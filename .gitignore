@@ -1,2 +1,6 @@
+
+data/*
+!data/.gitignore
+
 .ipynb_checkpoints
 scratch.py
