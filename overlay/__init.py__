@@ -1,0 +1,6 @@
+import sys
+import os
+
+from subprocess import check_output
+
+check_output('pip install geopandas --user -q')
