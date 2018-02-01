@@ -32,4 +32,4 @@ Or if you have already navigated to the project directory:
 
 The first time that you do this, you will need to download the container image from [quay.io/geodocker/jupyter-geopyspark](https://quay.io/repository/geodocker/jupyter-geopyspark?tag=latest&tab=tags). It will take a few minutes.
 
-After the image has downloaded, it will create a Jupyter server pointed at your local machine. Your default web browser will open and at `localhost:8000`. Refresh your browser. You will be prompted for a username and password, both of which are `hadoop`. After entering these, you will see the project directory in a Jupyter server. Navigate to the Jupyter Notebook of your choice.
+After the image has downloaded, it will create a Jupyter server pointed at your local machine. Open a web browser and point it at `localhost:8000`. You will be prompted for a username and password, both of which are `hadoop`. After entering these, you will see the project directory in a Jupyter server. Navigate to the Jupyter Notebook of your choice.
