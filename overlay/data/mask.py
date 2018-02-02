@@ -13,15 +13,11 @@ def maskRasterFromGDF(fullTiff, gdf, maskedTiff):
     args = env + [fullTiff, maskedTiff]
     _maskRaster(args)
 
-
 def maskRasterFromBbox(fullTiff, bbox, maskedTiff):
     args = bbox + [fullTiff, maskedTiff]
     _maskRaster(args)
 
 def _maskRaster(args):
-    # TODO: remove file if it's already there
     # check_output("rm -f " + maskedTiff)
-    cmd = "gdalwarp -te {}".format(' '.join(map(str,args)))
+    cmd = "gdalwarp -overwrite -te {}".format(' '.join(map(str, args))) 
     check_output(cmd, shell = True)
-
-
