@@ -52,6 +52,8 @@ class Overlay(object):
     	ls.get_map_layer(mplib_palette, n_colors)
     	self.layersets[name] = ls
 
+# TODO: reclass nodata to zero
+# TODO: clip each to polygon
 
 
 class LayerSet(object):
@@ -74,7 +76,7 @@ class LayerSet(object):
 		self.histo = self.pyramid.get_histogram()
 		if n_colors is None:
 			if self.histo.bucket_count() < 100:
-				n_colors = self.histo.bucket_count()
+				n_colors = self.histo.bucket_count() + 1
 			else:
 				n_colors = 100
 		self.colors = get_colors_from_matplotlib(mplib_palette, n_colors)
