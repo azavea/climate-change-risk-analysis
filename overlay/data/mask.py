@@ -1,6 +1,15 @@
 from osgeo import ogr
 from subprocess import check_output
 
+def clip_vector_to_boundaries(storm_surge_dataset, overlay):
+    output_dataset = storm_surge_dataset.replace('/read/', '/write/')
+    output_dataset = output_dataset.replace('.shp', '_{}.shp'.format(overlay.id))
+    bbox = overlay.study_area['bbox']
+    args = [output_dataset, storm_surge_dataset, '-clipsrc'] + bbox
+    cmd = "ogr2ogr -f 'ESRI Shapefile' {}".format(' '.join(map(str, args)))
+    check_output(cmd, shell = True) 
+    return(output_dataset)
+
 def maskRasterFromSHP(fullTiff, shp, maskedTiff):
     # TODO: account for geojson
     d = ogr.GetDriverByName("ESRI Shapefile").Open(shp)
