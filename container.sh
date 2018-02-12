@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# create local aws directory
 mkdir -p $HOME/.aws
 
+# run container
 docker run -it --rm --name geopyspark \
 	-p 8000:8000 -p 4040:4040 \
 	-v $(pwd $1):/home/hadoop/notebooks:rw \
