@@ -4,3 +4,5 @@ data/*
 
 .ipynb_checkpoints
 scratch.py
+
+*local.ipynb
