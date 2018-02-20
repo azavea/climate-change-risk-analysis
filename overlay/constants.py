@@ -47,4 +47,5 @@ NATL_COUNTY_SHP = '/home/hadoop/notebooks/data/read/boundaries/tl_2017_us_county
 NOAA_URL_BASE = 'https://coast.noaa.gov/htdata/Inundation/SLR/SLRdata/'
 
 # hospitals
-HOSPITALS = '/home/hadoop/notebooks/data/read/health/Hospitals_wgs.shp'
+HOSPITALS_WGS = '/home/hadoop/notebooks/data/read/health/Hospitals_wgs.shp'
+HOSPITALS_WM = '/home/hadoop/notebooks/data/read/health/Hospitals.shp'

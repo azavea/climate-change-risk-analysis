@@ -60,4 +60,4 @@ def get_county_study_area(county_name,
                     & (ct['STATEFP'] == str(state_fips))]
     county_ouptut = os.path.join(county_output_dir, county_file_name)
     one_county.to_file(county_ouptut)
-    return county_ouptut
+    return county_ouptutaa
