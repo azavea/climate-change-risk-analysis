@@ -1,10 +1,10 @@
-
 data/*
 !data/.gitignore
+data-all/
 
 .ipynb_checkpoints
-scratch.py
+overlay/__pycache__
 
+scratch.py
 *local.ipynb
 
-overlay/__pycache__
