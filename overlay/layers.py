@@ -34,7 +34,8 @@ def flood_hazard(overlay, flood_shp):
                                                 classification_strategy=gps.ClassificationStrategy.EXACT)
 
         # layout
-        flood_tiled = flood_reclass.tile_to_layout(gps.GlobalLayout(), 3857)
+        flood_tiled = flood_reclass.tile_to_layout(
+            gps.GlobalLayout(zoom=12), 3857)
 
         # convert to an appropriate format for the overlay
         return _union_with_base(flood_tiled, overlay)
@@ -75,7 +76,7 @@ def sea_level_rise(overlay, gdb, feet=5):
                                             classification_strategy=gps.ClassificationStrategy.EXACT)
 
         # convert layout
-        sea_tiled = sea_reclass.tile_to_layout(gps.GlobalLayout(), 3857)
+        sea_tiled = sea_reclass.tile_to_layout(gps.GlobalLayout(zoom=12), 3857)
 
         return _union_with_base(sea_tiled, overlay)
 
@@ -105,7 +106,7 @@ def storm_surge(overlay, storm_surge_tiff):
                                             classification_strategy=gps.ClassificationStrategy.GREATER_THAN_OR_EQUAL_TO)
 
     # convert to same layout as
-    storm_tiled = storm_reclass.tile_to_layout(gps.GlobalLayout(), 3857)
+    storm_tiled = storm_reclass.tile_to_layout(gps.GlobalLayout(zoom=12), 3857)
     return storm_tiled * overlay.base
 
 

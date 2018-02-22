@@ -1,5 +1,5 @@
 """
-This module contains the `Overlay` object within which the weighted 
+This module contains the `Overlay` object within which the weighted
     overlay analysis takes place
 """
 import os
@@ -76,8 +76,9 @@ class Overlay(object):
 
         # tiled raster
         base_raster = gps.rasterize(
-            [base_poly], 4326, 12, 1, gps.CellType.INT8)
-        base_tiled = base_raster.tile_to_layout(gps.GlobalLayout(), 3857)
+            [base_poly], 4326, 14, 1, gps.CellType.INT8)
+        base_tiled = base_raster.tile_to_layout(
+            gps.GlobalLayout(zoom=12), 3857)
         self.base = base_tiled
 
     def prep_data(self, flood_hazard_national, sea_level_rise_url, storm_surge_national):
@@ -179,8 +180,8 @@ class Overlay(object):
         """
         l = [self.flood, self.sea_level_rise, self.storm_surge]
         l = list(filter(None.__ne__, l))
-        print('>> Combining {} layers'.format(len(l)))
         self.overlay = sum(l) - len(l)
+        print('>> Combined {} layers into climate risk surface'.format(len(l)))
 
 
 # Additional Functions
@@ -222,7 +223,7 @@ def overlay_analysis(geonotebook,
                      overlay_name,
                      boundary_shp,
                      input_points,
-                     output_points,
+                     # output_points,
                      sea_url=None,
                      storm=constants.NATL_STORM_SURGE_1,
                      flood=constants.NATL_FLOOD_SHP,
@@ -234,10 +235,10 @@ def overlay_analysis(geonotebook,
         geonotebook (geonotebook.kernel.Geonotebook): working geonotebook
         overlay_name (str): id for overlay object
         boundary_shp (str): path to shapefile that defines study area
-        sea (str): url for sea level rise input dataset 
+        sea (str): url for sea level rise input dataset
         storm (str): national storm surge dataset
         flood (str): national flood dataset
-        color_map (gps.ColorMap): color map to use in mapping the result. If 
+        color_map (gps.ColorMap): color map to use in mapping the result. If
             None, it will construct one using Matplotlib color ramp 'magma'
 
     Returns:
@@ -250,7 +251,7 @@ def overlay_analysis(geonotebook,
     ov = Overlay(overlay_name, boundary_shp)
     print('>> Setting geonotebook view extent...')
     geonotebook.set_center(ov.study_area['centroid_wgs'][
-                           'x'], ov.study_area['centroid_wgs']['y'], 9)
+                           'x'], ov.study_area['centroid_wgs']['y'], 10)
 
     # pre-process data
     print('Data preparation')
@@ -270,20 +271,26 @@ def overlay_analysis(geonotebook,
     map_layer(geonotebook, ov.overlay, color_map)
 
     # get raster values at certain points
-    study_area_points_df = get_health_point_values(
-        input_points, ov, output_points)
+    input_file = os.path.basename(
+        constants.HEALTH_RESOURCE_FILES[input_points])
+    output_file = input_file.replace('.shp', '_{}.shp'.format(overlay_name))
+    output_points = os.path.join(constants.OUTPUT_DIR, output_file)
+    try:
+        study_area_points_df = get_health_point_values(
+            input_points, ov, output_points)
 
-    # add points to map
-    file = os.path.basename(output_points)
-    directory = os.path.dirname(output_points)
-    reproject_wgs(file, directory)
-    file_wgs = file.replace('.shp', '_wgs.shp')
-    add_points(geonotebook, os.path.join(
-        directory, file_wgs), colors=[0xFFFFFFFF])
+        # add points to map
+        reproject_wgs(os.path.basename(output_points),
+                      os.path.dirname(output_points))
+        file_wgs = os.path.basename(output_points).replace('.shp', '_wgs.shp')
+        add_points(geonotebook, os.path.join(
+            os.path.dirname(output_points), file_wgs), colors=[0xFFFFFFFF])
 
-    # create bar plot of risk scores in study area
-    p = plot_risk_score_counts(study_area_points_df)
-    return ov, p
+        # create bar plot of risk scores in study area
+        p = plot_risk_score_counts(study_area_points_df, input_points.lower())
+        return ov, p
+    except OSError:
+        print('Try evaluating risk for a broader study area or a different health resource')
 
 
 def reproject_wgs(file, directory):
@@ -326,23 +333,26 @@ def get_health_point_values(health_points, overlay, output_file):
     """
     # suppress unnecessary `SettingWithCopy` warnings
     pd.options.mode.chained_assignment = None  # default='warn'
-    health = gpd.read_file(health_points)
+    health_points_file = constants.HEALTH_RESOURCE_FILES[health_points]
+    health = gpd.read_file(health_points_file)
     health_study_area = health[health.within(
         overlay.study_area['geom_wm'][0])]
-    pt_vals = overlay.overlay.get_point_values(
-        list(health_study_area.geometry))
-    values = list(map(lambda x: 0.0 if np.isnan(
-        x[1][0]) else x[1][0], pt_vals))
-    health_study_area['risk_score'] = values
-    health_study_area.to_file(output_file)
+    try:
+        pt_vals = overlay.overlay.get_point_values(
+            list(health_study_area.geometry))
+        values = list(map(lambda x: 0.0 if np.isnan(
+            x[1][0]) else x[1][0], pt_vals))
+        health_study_area['risk_score'] = values
+        health_study_area.to_file(output_file)
+        output_csv = output_file.replace('.shp', '.csv')
+        hsa_df = pd.DataFrame(health_study_area)
+        hsa_df.to_csv(output_csv, index=False)
+        return hsa_df
+    except TypeError:
+        print('None of these health resources are located within the study area')
 
-    output_csv = output_file.replace('.shp', '.csv')
-    hsa_df = pd.DataFrame(health_study_area)
-    hsa_df.to_csv(output_csv, index=False)
-    return hsa_df
 
-
-def plot_risk_score_counts(health_facility_df):
+def plot_risk_score_counts(health_facility_df, facility_type):
     """
     Generate a bar plot showing the distributions of risk score
         values for 
@@ -352,12 +362,13 @@ def plot_risk_score_counts(health_facility_df):
     x = list(map(lambda x: risk_counts[x] if x in risk_counts.index else 0, y))
     cols = palettable.matplotlib.Magma_17_r.mpl_colors[::-1]
 
-    fig, ax = plt.subplots(figsize=(14, 7))
+    fig, ax = plt.subplots(figsize=(10, 4))
     plt.bar(y, x, color=cols)
     plt.xticks(y)
     plt.ylabel('count')
     plt.xlabel('risk score')
-    plt.title('Health facility climate change risk scores within study area')
+    plt.title(
+        'Climate change risk scores for {} within study area'.format(facility_type))
     plt.tick_params(top='off', bottom='off', left='off',
                     right='off', labelleft='on', labelbottom='on')
     for spine in plt.gca().spines.values():
