@@ -4,7 +4,6 @@ Data import function
 
 import os
 from os.path import basename, normpath, join
-from subprocess import check_output
 
 import fiona
 import pyproj
@@ -22,8 +21,8 @@ def zip_to_dir(url, directory):
     Download a zipfile from a url and unzip it into a local directory
 
     Args:
-            url (str): url of zip file
-            directory (str): output directory
+        url (str): url of zip file
+        directory (str): output directory
     """
     file = join(directory, basename(normpath(url)))
     request.urlretrieve(url, file)
@@ -36,10 +35,10 @@ def read_from_shp(file):
     Read a shapefile or geojson and return shapely geometries
 
     Args:
-            file (str): input filepath
+        file (str): input filepath
 
     Returns:
-            list of shapely.geometry objects
+        list of shapely.geometry objects
     """
     shapes = gpd.read_file(file)
     # this is a temporary hack, was having a difficult time
