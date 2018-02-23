@@ -16,12 +16,6 @@ Note: 'project directory' refers to the top level of this repository.
 
 ## Getting started
 
-Ensure that project directory has write access:
-
-`chmod o+w [project directory]`
-
-## Open Docker container
-
 Open the Docker container mounting project folder. This will allow you to read from and write to files within this directory from the Docker container.
 
 `./container.sh [project directory]`

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# enable read/write access to data directory
+chmod -R 777 data/
+
 # create local aws directory
 mkdir -p $HOME/.aws
 
