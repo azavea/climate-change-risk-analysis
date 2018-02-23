@@ -1,11 +1,12 @@
 #!/bin/bash
 
+chmod 777 climate-overlay.ipynb
+chmod 777 data/write/boundaries/
+chmod 777 data/write/overlay-layers/*
+chmod 777 data/output/
+
 # create local aws directory
 mkdir -p $HOME/.aws
-
-chmod o+w *.ipynb
-chmod o+w data/write/*
-chmod o+w data/output
 
 # run container
 docker run -it --rm --name geopyspark \
